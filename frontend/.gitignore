@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# environment & secrets
+.env
+.env.*
+!.env.example
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# logs
+*.log
+npm-debug.log*
+
+# uploads (if enabled later)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,124 @@
+/**
+ * Central place for every enum used across models, validators and services.
+ * Never hardcode these strings elsewhere.
+ */
+const ROLES = Object.freeze({
+  ADMIN: 'ADMIN',
+  MANAGER: 'MANAGER',
+  SALES_STAFF: 'SALES_STAFF',
+});
+
+const USER_STATUS = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+});
+
+const RECORD_STATUS = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+});
+
+const STOCK_STATUS = Object.freeze({
+  IN_STOCK: 'IN_STOCK',
+  LOW_STOCK: 'LOW_STOCK',
+  OUT_OF_STOCK: 'OUT_OF_STOCK',
+});
+
+const MOVEMENT_TYPES = Object.freeze({
+  PURCHASE: 'PURCHASE',
+  SALE: 'SALE',
+  MANUAL_INCREASE: 'MANUAL_INCREASE',
+  MANUAL_DECREASE: 'MANUAL_DECREASE',
+  RETURN: 'RETURN',
+  ADJUSTMENT: 'ADJUSTMENT',
+});
+
+const PAYMENT_METHODS = Object.freeze({
+  CASH: 'CASH',
+  CARD: 'CARD',
+  MOBILE_BANKING: 'MOBILE_BANKING',
+  BANK_TRANSFER: 'BANK_TRANSFER',
+});
+
+const SALE_STATUS = Object.freeze({
+  COMPLETED: 'COMPLETED',
+  PARTIALLY_RETURNED: 'PARTIALLY_RETURNED',
+  RETURNED: 'RETURNED',
+});
+
+const PURCHASE_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  RECEIVED: 'RECEIVED',
+  CANCELLED: 'CANCELLED',
+});
+
+const PAYMENT_STATUS = Object.freeze({
+  PAID: 'PAID',
+  PARTIAL: 'PARTIAL',
+  UNPAID: 'UNPAID',
+});
+
+const DISCOUNT_TYPES = Object.freeze({
+  PERCENT: 'PERCENT',
+  FIXED: 'FIXED',
+});
+
+const NOTIFICATION_TYPES = Object.freeze({
+  LOW_STOCK: 'LOW_STOCK',
+  OUT_OF_STOCK: 'OUT_OF_STOCK',
+  PURCHASE_COMPLETED: 'PURCHASE_COMPLETED',
+  SALE_COMPLETED: 'SALE_COMPLETED',
+  RETURN_PROCESSED: 'RETURN_PROCESSED',
+  SYSTEM: 'SYSTEM',
+});
+
+const NOTIFICATION_SEVERITY = Object.freeze({
+  INFO: 'INFO',
+  SUCCESS: 'SUCCESS',
+  WARNING: 'WARNING',
+  DANGER: 'DANGER',
+});
+
+const ENTITIES = Object.freeze({
+  AUTH: 'AUTH',
+  USER: 'USER',
+  PRODUCT: 'PRODUCT',
+  CATEGORY: 'CATEGORY',
+  BRAND: 'BRAND',
+  CUSTOMER: 'CUSTOMER',
+  SUPPLIER: 'SUPPLIER',
+  PURCHASE: 'PURCHASE',
+  SALE: 'SALE',
+  RETURN: 'RETURN',
+  INVENTORY: 'INVENTORY',
+  SETTINGS: 'SETTINGS',
+});
+
+const PRODUCT_UNITS = Object.freeze([
+  'pcs',
+  'kg',
+  'g',
+  'l',
+  'ml',
+  'm',
+  'box',
+  'pack',
+  'dozen',
+]);
+
+module.exports = {
+  ROLES,
+  USER_STATUS,
+  RECORD_STATUS,
+  STOCK_STATUS,
+  MOVEMENT_TYPES,
+  PAYMENT_METHODS,
+  SALE_STATUS,
+  PURCHASE_STATUS,
+  PAYMENT_STATUS,
+  DISCOUNT_TYPES,
+  NOTIFICATION_TYPES,
+  NOTIFICATION_SEVERITY,
+  ENTITIES,
+  PRODUCT_UNITS,
+};

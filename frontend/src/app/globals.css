@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent-soft text-ink;
+  }
+}
+
+@layer components {
+  /* Soft light tile used by tables and forms on the grey frame */
+  .card {
+    @apply rounded-3xl border border-black/5 bg-tile;
+  }
+
+  /* Dashboard: mid-grey tile with white text */
+  .tile-glass {
+    @apply rounded-3xl bg-[#636365] text-white shadow-card;
+  }
+
+  /* Dashboard: near-black tile with white text */
+  .tile-dark {
+    @apply rounded-3xl bg-[#1c1c1d] text-white;
+  }
+}
+
+/* Print: only the invoice area is printed (used from Phase 9) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+  }
+}
