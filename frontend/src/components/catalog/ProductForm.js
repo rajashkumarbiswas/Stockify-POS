@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CircleAlert, Info, Save } from 'lucide-react';
+import { CircleAlert, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { api } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 import { PRODUCT_UNITS, RECORD_STATUS_OPTIONS } from '@/lib/constants';
 import { formatMoney } from '@/lib/format';
+import Button from '@/components/ui/Button';
 import Field from '@/components/ui/Field';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
@@ -21,29 +23,24 @@ const toFormState = (product) => ({
   purchasePrice: product?.purchasePrice !== undefined ? String(product.purchasePrice) : '',
   sellingPrice: product?.sellingPrice !== undefined ? String(product.sellingPrice) : '',
   minStockLevel: product?.minStockLevel !== undefined ? String(product.minStockLevel) : '5',
+  openingStock: '',
   unit: product?.unit || 'pcs',
   image: product?.image || '',
   description: product?.description || '',
   status: product?.status || 'ACTIVE',
 });
 
-function Section({ title, hint, children }) {
-  return (
-    <fieldset className="rounded-2xl bg-[#faf9fe] p-5">
-      <legend className="sr-only">{title}</legend>
-      <h3 className="text-sm font-semibold text-ink">{title}</h3>
-      {hint && <p className="mt-0.5 text-xs text-slate-500">{hint}</p>}
-      <div className="mt-4">{children}</div>
-    </fieldset>
-  );
-}
-
 /**
- * Create / edit form. Note there is NO stock field: stock only changes through
- * inventory operations (Phase 6) and purchases / sales / returns.
+ * Create / edit form.
+ * There is no "current stock" field: stock only changes through inventory operations,
+ * purchases, sales and returns. The only exception is the optional "Opening stock" when
+ * creating a product, which the backend records as a stock movement.
  */
 export default function ProductForm({ mode, product, onSaved }) {
   const isEdit = mode === 'edit';
+  const { can } = useAuth();
+  const canSetOpeningStock = !isEdit && can('inventory:adjust');
+
   const [form, setForm] = useState(() => toFormState(product));
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -68,7 +65,10 @@ export default function ProductForm({ mode, product, onSaved }) {
 
   const update = (key) => (event) => setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
-  const categoryOptions = useMemo(() => categories.map((c) => ({ value: c.id, label: c.name })), [categories]);
+  const categoryOptions = useMemo(
+    () => categories.map((c) => ({ value: c.id, label: c.name })),
+    [categories]
+  );
   const brandOptions = useMemo(() => brands.map((b) => ({ value: b.id, label: b.name })), [brands]);
 
   const cost = Number(form.purchasePrice);
@@ -86,6 +86,13 @@ export default function ProductForm({ mode, product, onSaved }) {
     if (form.sellingPrice === '' || Number(form.sellingPrice) < 0) errors.sellingPrice = 'Enter a valid price';
     if (!Number.isInteger(Number(form.minStockLevel)) || Number(form.minStockLevel) < 0) {
       errors.minStockLevel = 'Enter a whole number (0 or more)';
+    }
+    if (
+      canSetOpeningStock &&
+      form.openingStock !== '' &&
+      (!Number.isInteger(Number(form.openingStock)) || Number(form.openingStock) < 0)
+    ) {
+      errors.openingStock = 'Enter a whole number (0 or more)';
     }
     return errors;
   };
@@ -112,6 +119,9 @@ export default function ProductForm({ mode, product, onSaved }) {
       description: form.description.trim(),
       status: form.status,
     };
+    if (canSetOpeningStock && form.openingStock !== '' && Number(form.openingStock) > 0) {
+      payload.openingStock = Number(form.openingStock);
+    }
 
     setSaving(true);
     try {
@@ -127,7 +137,7 @@ export default function ProductForm({ mode, product, onSaved }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       {(error || optionsError) && (
         <div
           role="alert"
@@ -138,138 +148,137 @@ export default function ProductForm({ mode, product, onSaved }) {
         </div>
       )}
 
-      <Section title="Basic information">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            className="sm:col-span-2"
-            label="Product name"
-            value={form.name}
-            onChange={update('name')}
-            error={fieldErrors.name}
-            placeholder="e.g. Samsung Galaxy A15 128GB"
-          />
-          <Field
-            label="SKU"
-            value={form.sku}
-            onChange={update('sku')}
-            error={fieldErrors.sku}
-            hint="Unique code. Saved in capital letters."
-            placeholder="e.g. PHN-SAM-A15"
-          />
-          <Field
-            label="Barcode (optional)"
-            value={form.barcode}
-            onChange={update('barcode')}
-            error={fieldErrors.barcode}
-            hint="Scan with a barcode reader or type it."
-          />
-          <Select
-            label="Category"
-            placeholder="Select a category"
-            options={categoryOptions}
-            value={form.category}
-            onChange={update('category')}
-            error={fieldErrors.category}
-            hint={categories.length === 0 && !optionsError ? 'No active categories yet. Create one first.' : undefined}
-          />
-          <Select
-            label="Brand (optional)"
-            placeholder="No brand"
-            options={brandOptions}
-            value={form.brand}
-            onChange={update('brand')}
-            error={fieldErrors.brand}
-          />
-        </div>
-      </Section>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          className="sm:col-span-2"
+          label="Product name"
+          value={form.name}
+          onChange={update('name')}
+          error={fieldErrors.name}
+          placeholder="e.g. Samsung Galaxy A15 128GB"
+        />
+        <Field
+          label="SKU"
+          value={form.sku}
+          onChange={update('sku')}
+          error={fieldErrors.sku}
+          hint="Unique code. Saved in capital letters."
+          placeholder="e.g. PHN-SAM-A15"
+        />
+        <Field
+          label="Barcode (optional)"
+          value={form.barcode}
+          onChange={update('barcode')}
+          error={fieldErrors.barcode}
+          hint="Scan with a barcode reader or type it."
+        />
+        <Select
+          label="Category"
+          placeholder="Select a category"
+          options={categoryOptions}
+          value={form.category}
+          onChange={update('category')}
+          error={fieldErrors.category}
+          hint={categories.length === 0 && !optionsError ? 'No active categories yet. Create one first.' : undefined}
+        />
+        <Select
+          label="Brand (optional)"
+          placeholder="No brand"
+          options={brandOptions}
+          value={form.brand}
+          onChange={update('brand')}
+          error={fieldErrors.brand}
+        />
+      </div>
 
-      <Section title="Pricing">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Purchase price"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            value={form.purchasePrice}
-            onChange={update('purchasePrice')}
-            error={fieldErrors.purchasePrice}
-          />
-          <Field
-            label="Selling price"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            value={form.sellingPrice}
-            onChange={update('sellingPrice')}
-            error={fieldErrors.sellingPrice}
-          />
-          {showMargin && (
-            <p className="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 sm:col-span-2">
-              Profit per unit:{' '}
-              <strong className={profit < 0 ? 'text-red-600' : 'text-emerald-700'}>
-                {formatMoney(profit)} ({marginPercent.toFixed(1)}%)
-              </strong>
-            </p>
-          )}
-        </div>
-      </Section>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Purchase price"
+          type="number"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          value={form.purchasePrice}
+          onChange={update('purchasePrice')}
+          error={fieldErrors.purchasePrice}
+        />
+        <Field
+          label="Selling price"
+          type="number"
+          min="0"
+          step="0.01"
+          inputMode="decimal"
+          value={form.sellingPrice}
+          onChange={update('sellingPrice')}
+          error={fieldErrors.sellingPrice}
+        />
+        {showMargin && (
+          <p className="text-sm text-slate-600 sm:col-span-2">
+            Profit per unit:{' '}
+            <strong className={profit < 0 ? 'text-red-600' : 'text-emerald-700'}>
+              {formatMoney(profit)} ({marginPercent.toFixed(1)}%)
+            </strong>
+          </p>
+        )}
+      </div>
 
-      <Section title="Stock settings">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field
-            label="Minimum stock level"
-            type="number"
-            min="0"
-            step="1"
-            inputMode="numeric"
-            value={form.minStockLevel}
-            onChange={update('minStockLevel')}
-            error={fieldErrors.minStockLevel}
-            hint="Low-stock alert at or below this."
-          />
-          <Select label="Unit" options={UNIT_OPTIONS} value={form.unit} onChange={update('unit')} />
-          <Select label="Status" options={RECORD_STATUS_OPTIONS} value={form.status} onChange={update('status')} />
-        </div>
-      </Section>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field
+          label="Minimum stock level"
+          type="number"
+          min="0"
+          step="1"
+          inputMode="numeric"
+          value={form.minStockLevel}
+          onChange={update('minStockLevel')}
+          error={fieldErrors.minStockLevel}
+          hint="Low-stock alert at or below this."
+        />
+        <Select label="Unit" options={UNIT_OPTIONS} value={form.unit} onChange={update('unit')} />
+        <Select label="Status" options={RECORD_STATUS_OPTIONS} value={form.status} onChange={update('status')} />
+      </div>
 
-      <Section title="Extra details">
-        <div className="space-y-4">
-          <Field
-            label="Image URL (optional)"
-            type="url"
-            value={form.image}
-            onChange={update('image')}
-            error={fieldErrors.image}
-            placeholder="https://..."
-          />
-          <Textarea
-            label="Description (optional)"
-            rows={4}
-            value={form.description}
-            onChange={update('description')}
-            error={fieldErrors.description}
-          />
-        </div>
-      </Section>
+      {canSetOpeningStock && (
+        <Field
+          className="sm:max-w-xs"
+          label="Opening stock (optional)"
+          type="number"
+          min="0"
+          step="1"
+          inputMode="numeric"
+          value={form.openingStock}
+          onChange={update('openingStock')}
+          error={fieldErrors.openingStock}
+          hint="Units you already have. Saved as a stock movement."
+        />
+      )}
 
-      <p className="flex items-start gap-2 rounded-xl bg-[#ece9f8] px-4 py-3 text-sm text-[#4f4590]">
-        <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+      <Field
+        label="Image URL (optional)"
+        type="url"
+        value={form.image}
+        onChange={update('image')}
+        error={fieldErrors.image}
+        placeholder="https://..."
+      />
+      <Textarea
+        label="Description (optional)"
+        rows={4}
+        value={form.description}
+        onChange={update('description')}
+        error={fieldErrors.description}
+      />
+
+      <p className="rounded-xl bg-white px-4 py-3 text-sm text-slate-600 shadow-card">
         {isEdit
-          ? 'Stock quantity cannot be edited here. It changes through purchases, sales, returns and inventory adjustments.'
-          : 'New products start with 0 stock. Add stock through Purchases or an inventory adjustment.'}
+          ? 'Stock quantity cannot be edited here. Use Inventory to add, remove or count stock.'
+          : 'Stock is never typed in directly. Opening stock is recorded as a stock movement, and later changes go through Purchases, Sales, Returns or Inventory adjustments.'}
       </p>
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex h-11 items-center gap-2 rounded-full bg-[#1c1c20] px-6 text-sm font-medium text-white transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Save className="h-4 w-4" aria-hidden="true" />
-          {saving ? 'Saving...' : isEdit ? 'Save changes' : 'Create product'}
-        </button>
+        <Button type="submit" icon={Save} loading={saving}>
+          {isEdit ? 'Save changes' : 'Create product'}
+        </Button>
       </div>
     </form>
   );

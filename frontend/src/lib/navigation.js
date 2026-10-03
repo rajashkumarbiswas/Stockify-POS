@@ -18,7 +18,7 @@ import {
 /**
  * Single source of truth for navigation.
  * - permission / anyOf: item is hidden when the user lacks it (UI only; the backend enforces access)
- * - primary: shown in the top bar; the rest go under "More"
+ * - primary: shown in the top bar; the rest go under the side rail
  * - ready: set to true when the page is built (until then it shows as "coming soon")
  */
 export const NAV_ITEMS = [
@@ -33,7 +33,7 @@ export const NAV_ITEMS = [
     ready: false,
   },
   { href: '/products', label: 'Products', icon: Package, permission: 'products:read', primary: true, ready: true },
-  { href: '/inventory', label: 'Inventory', icon: Boxes, permission: 'inventory:read', primary: true, ready: false },
+  { href: '/inventory', label: 'Inventory', icon: Boxes, permission: 'inventory:read', primary: true, ready: true },
   {
     href: '/purchases',
     label: 'Purchases',

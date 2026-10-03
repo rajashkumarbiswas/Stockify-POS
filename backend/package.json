@@ -12,7 +12,8 @@
     "user:create": "node seed/createUser.js",
     "auth:test": "node seed/authSmokeTest.js",
     "core:test": "node seed/coreSmokeTest.js",
-    "catalog:test": "node seed/catalogTest.js"
+    "catalog:test": "node seed/catalogTest.js",
+    "inventory:test": "node seed/inventoryTest.js"
   },
   "engines": {
     "node": ">=18"

@@ -23,3 +23,26 @@ export const STOCK_STATUS_OPTIONS = [
   { value: 'LOW_STOCK', label: 'Low stock' },
   { value: 'OUT_OF_STOCK', label: 'Out of stock' },
 ];
+
+// Stock movement types (must match MOVEMENT_TYPES in the backend)
+export const MOVEMENT_TYPE_META = {
+  PURCHASE: { label: 'Purchase', tone: 'info' },
+  SALE: { label: 'Sale', tone: 'neutral' },
+  MANUAL_INCREASE: { label: 'Manual increase', tone: 'success' },
+  MANUAL_DECREASE: { label: 'Manual decrease', tone: 'danger' },
+  RETURN: { label: 'Return', tone: 'lime' },
+  ADJUSTMENT: { label: 'Stock take', tone: 'warning' },
+};
+
+export const MOVEMENT_TYPE_OPTIONS = Object.entries(MOVEMENT_TYPE_META).map(([value, meta]) => ({
+  value,
+  label: meta.label,
+}));
+
+export const DATE_RANGE_OPTIONS = [
+  { value: 'today', label: 'Today' },
+  { value: 'yesterday', label: 'Yesterday' },
+  { value: 'this_week', label: 'This week' },
+  { value: 'this_month', label: 'This month' },
+  { value: 'custom', label: 'Custom range' },
+];

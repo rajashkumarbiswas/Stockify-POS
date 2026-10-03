@@ -9,6 +9,7 @@ const money = (label) =>
  * NOTE: "currentStock" is intentionally NOT a field here. Joi rejects unknown keys,
  * so any request that tries to set stock directly fails with 400.
  * Stock changes only through the inventory / purchase / sale / return services.
+ * (Only "openingStock" on CREATE is allowed, and it also goes through the inventory service.)
  */
 const fields = {
   name: Joi.string().trim().min(2).max(150).label('Product name'),
@@ -57,6 +58,7 @@ const createProductSchema = Joi.object({
   category: fields.category.required(),
   purchasePrice: fields.purchasePrice.required(),
   sellingPrice: fields.sellingPrice.required(),
+  openingStock: Joi.number().integer().min(0).max(10000000).label('Opening stock'),
 });
 
 const updateProductSchema = Joi.object(fields)

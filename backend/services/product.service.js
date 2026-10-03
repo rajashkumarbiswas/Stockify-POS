@@ -3,9 +3,12 @@ const ApiError = require('../utils/ApiError');
 const pick = require('../utils/pick');
 const { paginate } = require('../utils/paginate');
 const { buildSearchFilter, combineFilters } = require('../utils/search');
+const { buildStockStatusFilter } = require('../utils/stock');
+const { withTransaction } = require('../utils/transaction');
 const activityService = require('./activity.service');
+const inventoryService = require('./inventory.service');
 const { hasPermission, PERMISSIONS } = require('../config/permissions');
-const { ENTITIES, RECORD_STATUS, STOCK_STATUS } = require('../config/constants');
+const { ENTITIES, RECORD_STATUS, MOVEMENT_TYPES } = require('../config/constants');
 
 const POPULATE = [
   { path: 'category', select: 'name' },
@@ -43,19 +46,6 @@ const toDto = (doc, user) => {
   const dto = doc.toJSON();
   if (!canViewCost(user)) delete dto.purchasePrice;
   return dto;
-};
-
-const stockFilter = (stockStatus) => {
-  switch (stockStatus) {
-    case STOCK_STATUS.IN_STOCK:
-      return { $expr: { $gt: ['$currentStock', '$minStockLevel'] } };
-    case STOCK_STATUS.LOW_STOCK:
-      return { currentStock: { $gt: 0 }, $expr: { $lte: ['$currentStock', '$minStockLevel'] } };
-    case STOCK_STATUS.OUT_OF_STOCK:
-      return { currentStock: { $lte: 0 } };
-    default:
-      return null;
-  }
 };
 
 /** '' and null mean "clear this optional field". Returns explicit undefined so Mongoose unsets it. */
@@ -113,7 +103,7 @@ const list = async (query, user) => {
     query.category ? { category: query.category } : null,
     query.brand ? { brand: query.brand } : null,
     query.status && canManage(user) ? { status: query.status } : null,
-    stockFilter(query.stockStatus),
+    buildStockStatusFilter(query.stockStatus),
     visibilityFilter(user)
   );
 
@@ -145,12 +135,34 @@ const lookup = async (code, user) => {
 const getById = async (id, user) => toDto(await findVisibleOrFail(id, user), user);
 
 const create = async (data, user) => {
+  const openingStock = data.openingStock || 0;
+  if (openingStock > 0 && !hasPermission(user.role, PERMISSIONS.INVENTORY_ADJUST)) {
+    throw ApiError.forbidden('You do not have permission to set opening stock');
+  }
+
   await assertReference(Category, data.category, 'Category');
   if (data.brand) await assertReference(Brand, data.brand, 'Brand');
 
-  let product;
+  let created;
   try {
-    product = await Product.create(buildChanges(data)); // currentStock starts at 0
+    // Product + opening stock movement are saved together or not at all
+    created = await withTransaction(async (session) => {
+      const [product] = await Product.create([buildChanges(data)], { session }); // starts at 0 stock
+
+      if (openingStock > 0) {
+        await inventoryService.adjustStock(
+          {
+            productId: product._id,
+            type: MOVEMENT_TYPES.MANUAL_INCREASE,
+            quantity: openingStock,
+            reason: 'Opening stock',
+            user,
+          },
+          session
+        );
+      }
+      return product;
+    });
   } catch (error) {
     throw translateDuplicate(error);
   }
@@ -159,11 +171,14 @@ const create = async (data, user) => {
     user: user._id,
     action: 'PRODUCT_CREATED',
     entity: ENTITIES.PRODUCT,
-    entityId: product._id,
-    description: `${user.name} created product "${product.name}" (${product.sku})`,
+    entityId: created._id,
+    description:
+      `${user.name} created product "${created.name}" (${created.sku})` +
+      (openingStock > 0 ? ` with opening stock ${openingStock}` : ''),
   });
 
-  await product.populate(POPULATE);
+  // Reload so the response shows the real stock written by the inventory service
+  const product = await Product.findById(created._id).populate(POPULATE);
   return toDto(product, user);
 };
 

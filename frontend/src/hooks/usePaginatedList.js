@@ -9,7 +9,8 @@ import useDebounce from '@/hooks/useDebounce';
  *
  *   const list = usePaginatedList('/products', { initialParams: { sortBy: 'name', sortOrder: 'asc' } });
  *   list.items / list.pagination / list.loading / list.error
- *   list.setPage(2)  list.setFilter('category', id)  list.setSort('name')  list.reload()
+ *   list.setPage(2)  list.setFilter('category', id)  list.setFilters({ range: 'today' })
+ *   list.setSort('name')  list.reload()
  */
 export default function usePaginatedList(endpoint, { initialParams = {} } = {}) {
   const [params, setParams] = useState({ page: 1, limit: 10, search: '', ...initialParams });
@@ -49,6 +50,8 @@ export default function usePaginatedList(endpoint, { initialParams = {} } = {}) 
 
   const setPage = useCallback((page) => setParams((p) => ({ ...p, page })), []);
   const setFilter = useCallback((key, value) => setParams((p) => ({ ...p, [key]: value, page: 1 })), []);
+  // Change several filters in ONE request (e.g. a date range = range + from + to)
+  const setFilters = useCallback((values) => setParams((p) => ({ ...p, ...values, page: 1 })), []);
   const setSort = useCallback(
     (field) =>
       setParams((p) => ({
@@ -61,5 +64,15 @@ export default function usePaginatedList(endpoint, { initialParams = {} } = {}) 
   );
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
-  return { ...state, params, searchInput, setSearchInput, setPage, setFilter, setSort, reload };
+  return {
+    ...state,
+    params,
+    searchInput,
+    setSearchInput,
+    setPage,
+    setFilter,
+    setFilters,
+    setSort,
+    reload,
+  };
 }

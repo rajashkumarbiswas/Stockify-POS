@@ -22,6 +22,7 @@ router.use('/auth', require('./auth.routes'));
 router.use('/categories', require('./category.routes'));
 router.use('/brands', require('./brand.routes'));
 router.use('/products', require('./product.routes'));
-// Later phases mount: inventory, suppliers, purchases, customers, sales, returns, reports...
+router.use('/inventory', require('./inventory.routes'));
+// Later phases mount: suppliers, purchases, customers, sales, returns, reports...
 
 module.exports = router;
