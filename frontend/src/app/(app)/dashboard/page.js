@@ -91,7 +91,7 @@ export default function DashboardPage() {
   const { loading, error, data } = state;
 
   const refreshButton = (
-    <Button icon={RefreshCw} onClick={load} loading={loading} size="sm">
+    <Button variant="secondary" icon={RefreshCw} onClick={load} loading={loading} size="sm">
       Refresh
     </Button>
   );
@@ -117,21 +117,21 @@ export default function DashboardPage() {
         actions={refreshButton}
       />
 
-      {/* Top section: soft red glow behind the tiles (decorative) */}
+      {/* Top section: soft green glow behind the tiles (decorative) */}
       <section className="relative overflow-hidden rounded-3xl">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              'radial-gradient(ellipse at 58% 48%, rgba(34,197,94,0.55) 0%, rgba(34,197,94,0.18) 28%, rgba(34,197,94,0) 55%), radial-gradient(rgba(0,0,0,0.12) 1px, transparent 1.2px)',
+              'radial-gradient(ellipse at 58% 48%, rgba(34,197,94,0.5) 0%, rgba(34,197,94,0.16) 28%, rgba(34,197,94,0) 55%), radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1.2px)',
             backgroundSize: '100% 100%, 14px 14px',
           }}
         />
 
         <div className="relative grid gap-4 lg:min-h-[340px] lg:grid-cols-12">
           <div className="flex flex-col gap-4 lg:col-span-5">
-            <div className="tile-glass p-5 sm:p-6">
+            <div className="tile-glass p-5 ring-1 ring-white/10 sm:p-6">
               <h2 className="text-lg font-medium">Overview</h2>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <OverviewStat label="Active products" value={data?.total} loading={loading} />
@@ -141,14 +141,14 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="tile-glass flex flex-col justify-between p-5">
+              <div className="tile-glass flex flex-col justify-between p-5 ring-1 ring-white/10">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-base font-medium">Categories</h3>
                   {can('categories:read') && (
                     <Link
                       href="/categories"
                       aria-label="Open categories"
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white hover:bg-ink-800"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white ring-1 ring-white/20 hover:bg-ink-800"
                     >
                       <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                 </p>
               </div>
 
-              <div className="tile-glass flex flex-col justify-between p-5">
+              <div className="tile-glass flex flex-col justify-between p-5 ring-1 ring-white/10">
                 <h3 className="text-base font-medium">Today&apos;s sales</h3>
                 <div className="mt-5">
                   <p className="text-4xl font-medium tracking-tight">—</p>
@@ -170,7 +170,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-end justify-end lg:col-span-7">
-            <div className="tile-glass w-full p-5 sm:p-6 lg:max-w-sm">
+            <div className="tile-glass w-full p-5 ring-1 ring-white/10 sm:p-6 lg:max-w-sm">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-medium">Stock health</h2>
@@ -182,7 +182,7 @@ export default function DashboardPage() {
                   <Link
                     href="/products"
                     aria-label="Open products"
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white hover:bg-ink-800"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white ring-1 ring-white/20 hover:bg-ink-800"
                   >
                     <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
                   </Link>
@@ -200,7 +200,7 @@ export default function DashboardPage() {
 
       {/* Bottom section */}
       <section className="mt-4 grid gap-4 lg:grid-cols-12">
-        <div className="tile-dark p-5 sm:p-6 lg:col-span-7">
+        <div className="tile-dark p-5 ring-1 ring-white/10 sm:p-6 lg:col-span-7">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-medium">Latest products</h2>
             {can('products:read') && (
@@ -266,7 +266,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-4 lg:col-span-5">
-          <div className="tile-dark flex flex-1 flex-col p-5 sm:p-6">
+          <div className="tile-dark flex flex-1 flex-col p-5 ring-1 ring-white/10 sm:p-6">
             <h2 className="text-lg font-medium">Sales overview</h2>
             <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
               <div aria-hidden="true" className="mb-5 flex h-16 w-full max-w-xs items-end justify-between gap-2">
@@ -284,7 +284,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-accent-dark via-accent to-[#0d3d22] px-5 py-4 text-white">
+          <div className="flex items-center justify-between gap-4 rounded-3xl bg-gradient-to-r from-accent-dark via-accent to-[#0d3d22] px-5 py-4 text-white ring-1 ring-white/10">
             <p className="text-sm font-medium">
               {can('products:create') ? 'Grow your catalog: add a new product' : 'Browse the product catalog'}
             </p>

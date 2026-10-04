@@ -56,7 +56,7 @@ function RailTooltip({ children }) {
 const RAIL_BASE =
   'group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors';
 
-function RailItem({ item, active, dark }) {
+function RailItem({ item, active }) {
   const Icon = item.icon;
 
   if (!item.ready) {
@@ -64,11 +64,7 @@ function RailItem({ item, active, dark }) {
       <span
         aria-disabled="true"
         title={`${item.label} (coming soon)`}
-        className={clsx(
-          RAIL_BASE,
-          'cursor-not-allowed',
-          dark ? 'bg-white/5 text-white/30' : 'bg-black/5 text-slate-400'
-        )}
+        className={clsx(RAIL_BASE, 'cursor-not-allowed bg-white/5 text-white/30')}
       >
         <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
         <RailTooltip>{item.label} (soon)</RailTooltip>
@@ -83,13 +79,7 @@ function RailItem({ item, active, dark }) {
       aria-current={active ? 'page' : undefined}
       className={clsx(
         RAIL_BASE,
-        active
-          ? dark
-            ? 'bg-white text-ink'
-            : 'bg-ink text-white'
-          : dark
-            ? 'bg-white/10 text-white hover:bg-white/20'
-            : 'bg-black/5 text-ink hover:bg-black/10'
+        active ? 'bg-white text-ink' : 'bg-white/10 text-white hover:bg-white/20'
       )}
     >
       <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -168,7 +158,7 @@ function MobileDrawer({ open, onClose, items, pathname, user, onLogout, signingO
       <div className="absolute inset-0 bg-ink/60 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <aside className="absolute inset-y-0 left-0 flex w-80 max-w-[85vw] flex-col rounded-r-[28px] bg-white p-4 shadow-pill">
         <div className="flex items-center justify-between px-2 py-2">
-          <Logo variant="ink" />
+          <Logo />
           <button
             type="button"
             onClick={onClose}
@@ -230,19 +220,15 @@ function MobileDrawer({ open, onClose, items, pathname, user, onLogout, signingO
 }
 
 /**
- * Signed-in page frame.
- * - Dashboard: light rounded frame on a dark backdrop (as before).
- * - Every other page: full-screen green-to-black gradient background, white menu pill on top,
- *   light-coloured side rail. The gradient is defined once in globals.css (.page-gradient).
+ * Signed-in page frame, the same on EVERY page (dashboard included):
+ * a full-screen green-to-black gradient background (defined once in globals.css as .page-gradient),
+ * a white menu pill on top and a light icon rail on the left.
  */
 export default function AppShell({ children }) {
   const { user, can, canAny, logout } = useAuth();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-
-  const isDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
-  const dark = !isDashboard;
 
   const visibleItems = useMemo(
     () => NAV_ITEMS.filter((item) => isItemAllowed(item, can, canAny)),
@@ -268,29 +254,16 @@ export default function AppShell({ children }) {
   };
 
   return (
-    <div className={clsx('relative min-h-screen', dark ? 'surface-dark bg-night' : 'bg-shell p-2 sm:p-5')}>
-      {dark && (
-        <div
-          key={pathname}
-          aria-hidden="true"
-          className="page-gradient page-gradient-reveal pointer-events-none fixed inset-0 z-0"
-        />
-      )}
-
+    <div className="surface-dark relative min-h-screen bg-night">
+      {/* Changing the key restarts the "green pours from the top" animation on every page change */}
       <div
-        className={clsx(
-          'mx-auto flex w-full max-w-[1560px] flex-col p-4 sm:p-6',
-          dark
-            ? 'relative z-10 min-h-screen'
-            : 'min-h-[calc(100vh-1rem)] rounded-[28px] bg-frame sm:min-h-[calc(100vh-2.5rem)]'
-        )}
-      >
-        <header
-          className={clsx(
-            'flex items-center justify-between gap-3',
-            dark && 'rounded-full bg-white px-3 py-2 shadow-pill sm:px-5'
-          )}
-        >
+        key={pathname}
+        aria-hidden="true"
+        className="page-gradient page-gradient-reveal pointer-events-none fixed inset-0 z-0"
+      />
+
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1560px] flex-col p-4 sm:p-6">
+        <header className="flex items-center justify-between gap-3 rounded-full bg-white px-3 py-2 shadow-pill sm:px-5">
           <div className="flex items-center gap-3 xl:gap-8">
             <button
               type="button"
@@ -301,7 +274,7 @@ export default function AppShell({ children }) {
               <Menu className="h-5 w-5" aria-hidden="true" />
             </button>
             <Link href="/dashboard" aria-label="Stockify home">
-              <Logo variant="ink" />
+              <Logo />
             </Link>
             <nav className="hidden items-center gap-1 xl:flex" aria-label="Main">
               {primaryItems.map((item) => (
@@ -328,11 +301,7 @@ export default function AppShell({ children }) {
               <Link
                 href="/products"
                 aria-label="Search products"
-                className={clsx(
-                  RAIL_BASE,
-                  'mb-2 h-12 w-12',
-                  dark ? 'bg-white text-ink hover:bg-white/90' : 'bg-ink text-white hover:bg-ink-800'
-                )}
+                className={clsx(RAIL_BASE, 'mb-2 h-12 w-12 bg-white text-ink hover:bg-white/90')}
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
                 <RailTooltip>Search products</RailTooltip>
@@ -340,7 +309,7 @@ export default function AppShell({ children }) {
             )}
 
             {railItems.map((item) => (
-              <RailItem key={item.href} item={item} active={isActivePath(pathname, item.href)} dark={dark} />
+              <RailItem key={item.href} item={item} active={isActivePath(pathname, item.href)} />
             ))}
 
             <button
@@ -350,10 +319,7 @@ export default function AppShell({ children }) {
               aria-label="Sign out"
               className={clsx(
                 RAIL_BASE,
-                'mt-auto disabled:opacity-60',
-                dark
-                  ? 'bg-white/10 text-white hover:bg-red-500/25 hover:text-red-200'
-                  : 'bg-black/5 text-ink hover:bg-red-50 hover:text-red-600'
+                'mt-auto bg-white/10 text-white hover:bg-red-500/25 hover:text-red-200 disabled:opacity-60'
               )}
             >
               <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
