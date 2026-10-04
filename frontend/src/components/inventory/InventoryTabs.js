@@ -9,11 +9,12 @@ const TABS = [
   { href: '/inventory/movements', label: 'Stock movements' },
 ];
 
+/** Inventory pages always sit on the dark gradient, so the tabs use light colours. */
 export default function InventoryTabs() {
   const pathname = usePathname();
 
   return (
-    <nav className="mb-6 inline-flex rounded-full bg-black/5 p-1" aria-label="Inventory sections">
+    <nav className="mb-6 inline-flex rounded-full bg-white/10 p-1 backdrop-blur-sm" aria-label="Inventory sections">
       {TABS.map((tab) => {
         const active = pathname === tab.href;
         return (
@@ -23,7 +24,7 @@ export default function InventoryTabs() {
             aria-current={active ? 'page' : undefined}
             className={clsx(
               'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-              active ? 'bg-ink text-white' : 'text-slate-700 hover:text-ink'
+              active ? 'bg-white text-ink' : 'text-white/80 hover:text-white'
             )}
           >
             {tab.label}

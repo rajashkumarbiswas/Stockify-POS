@@ -14,7 +14,10 @@ const getPages = (current, total) => {
   return result;
 };
 
-/** Uses the `pagination` object returned by the API (meta.pagination). */
+/**
+ * Uses the `pagination` object returned by the API (meta.pagination).
+ * The "pager-*" classes let globals.css restyle it for the dark gradient pages.
+ */
 export default function Pagination({ pagination, onPageChange }) {
   if (!pagination || pagination.totalItems === 0) return null;
 
@@ -23,11 +26,11 @@ export default function Pagination({ pagination, onPageChange }) {
   const end = Math.min(totalItems, currentPage * limit);
 
   const buttonBase =
-    'flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition-colors';
+    'pager-btn flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition-colors';
 
   return (
     <div className="flex flex-col items-center justify-between gap-3 px-1 pt-4 sm:flex-row">
-      <p className="text-sm text-slate-600">
+      <p className="pager-text text-sm text-slate-600">
         Showing <strong className="text-ink">{start}</strong> to <strong className="text-ink">{end}</strong> of{' '}
         <strong className="text-ink">{totalItems}</strong>
       </p>
@@ -45,7 +48,7 @@ export default function Pagination({ pagination, onPageChange }) {
 
         {getPages(currentPage, totalPages).map((page, index) =>
           page === 'gap' ? (
-            <span key={`gap-${index}`} className="px-1 text-slate-400">
+            <span key={`gap-${index}`} className="pager-gap px-1 text-slate-400">
               …
             </span>
           ) : (

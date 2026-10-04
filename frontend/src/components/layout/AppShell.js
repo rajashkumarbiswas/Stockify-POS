@@ -46,7 +46,7 @@ function RailTooltip({ children }) {
   return (
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-full z-20 ml-3 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-pill transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+      className="pointer-events-none absolute left-full z-20 ml-3 whitespace-nowrap rounded-lg bg-ink px-2.5 py-1.5 text-xs font-medium text-white opacity-0 shadow-pill ring-1 ring-white/20 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
     >
       {children}
     </span>
@@ -56,7 +56,7 @@ function RailTooltip({ children }) {
 const RAIL_BASE =
   'group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors';
 
-function RailItem({ item, active }) {
+function RailItem({ item, active, dark }) {
   const Icon = item.icon;
 
   if (!item.ready) {
@@ -64,7 +64,11 @@ function RailItem({ item, active }) {
       <span
         aria-disabled="true"
         title={`${item.label} (coming soon)`}
-        className={clsx(RAIL_BASE, 'cursor-not-allowed bg-black/5 text-slate-400')}
+        className={clsx(
+          RAIL_BASE,
+          'cursor-not-allowed',
+          dark ? 'bg-white/5 text-white/30' : 'bg-black/5 text-slate-400'
+        )}
       >
         <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
         <RailTooltip>{item.label} (soon)</RailTooltip>
@@ -77,7 +81,16 @@ function RailItem({ item, active }) {
       href={item.href}
       aria-label={item.label}
       aria-current={active ? 'page' : undefined}
-      className={clsx(RAIL_BASE, active ? 'bg-ink text-white' : 'bg-black/5 text-ink hover:bg-black/10')}
+      className={clsx(
+        RAIL_BASE,
+        active
+          ? dark
+            ? 'bg-white text-ink'
+            : 'bg-ink text-white'
+          : dark
+            ? 'bg-white/10 text-white hover:bg-white/20'
+            : 'bg-black/5 text-ink hover:bg-black/10'
+      )}
     >
       <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
       <RailTooltip>{item.label}</RailTooltip>
@@ -217,14 +230,19 @@ function MobileDrawer({ open, onClose, items, pathname, user, onLogout, signingO
 }
 
 /**
- * Signed-in page frame: dark backdrop, a light rounded frame, pill navigation on top
- * and an icon sidebar on the left (large screens). Everything is permission-aware.
+ * Signed-in page frame.
+ * - Dashboard: light rounded frame on a dark backdrop (as before).
+ * - Every other page: full-screen green-to-black gradient background, white menu pill on top,
+ *   light-coloured side rail. The gradient is defined once in globals.css (.page-gradient).
  */
 export default function AppShell({ children }) {
   const { user, can, canAny, logout } = useAuth();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  const isDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/');
+  const dark = !isDashboard;
 
   const visibleItems = useMemo(
     () => NAV_ITEMS.filter((item) => isItemAllowed(item, can, canAny)),
@@ -250,9 +268,29 @@ export default function AppShell({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-shell p-2 sm:p-5">
-      <div className="mx-auto flex min-h-[calc(100vh-1rem)] max-w-[1560px] flex-col rounded-[28px] bg-frame p-4 sm:min-h-[calc(100vh-2.5rem)] sm:p-6">
-        <header className="flex items-center justify-between gap-3">
+    <div className={clsx('relative min-h-screen', dark ? 'surface-dark bg-night' : 'bg-shell p-2 sm:p-5')}>
+      {dark && (
+        <div
+          key={pathname}
+          aria-hidden="true"
+          className="page-gradient page-gradient-reveal pointer-events-none fixed inset-0 z-0"
+        />
+      )}
+
+      <div
+        className={clsx(
+          'mx-auto flex w-full max-w-[1560px] flex-col p-4 sm:p-6',
+          dark
+            ? 'relative z-10 min-h-screen'
+            : 'min-h-[calc(100vh-1rem)] rounded-[28px] bg-frame sm:min-h-[calc(100vh-2.5rem)]'
+        )}
+      >
+        <header
+          className={clsx(
+            'flex items-center justify-between gap-3',
+            dark && 'rounded-full bg-white px-3 py-2 shadow-pill sm:px-5'
+          )}
+        >
           <div className="flex items-center gap-3 xl:gap-8">
             <button
               type="button"
@@ -290,7 +328,11 @@ export default function AppShell({ children }) {
               <Link
                 href="/products"
                 aria-label="Search products"
-                className={clsx(RAIL_BASE, 'mb-2 h-12 w-12 bg-ink text-white hover:bg-ink-800')}
+                className={clsx(
+                  RAIL_BASE,
+                  'mb-2 h-12 w-12',
+                  dark ? 'bg-white text-ink hover:bg-white/90' : 'bg-ink text-white hover:bg-ink-800'
+                )}
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
                 <RailTooltip>Search products</RailTooltip>
@@ -298,7 +340,7 @@ export default function AppShell({ children }) {
             )}
 
             {railItems.map((item) => (
-              <RailItem key={item.href} item={item} active={isActivePath(pathname, item.href)} />
+              <RailItem key={item.href} item={item} active={isActivePath(pathname, item.href)} dark={dark} />
             ))}
 
             <button
@@ -308,7 +350,10 @@ export default function AppShell({ children }) {
               aria-label="Sign out"
               className={clsx(
                 RAIL_BASE,
-                'mt-auto bg-black/5 text-ink hover:bg-red-50 hover:text-red-600 disabled:opacity-60'
+                'mt-auto disabled:opacity-60',
+                dark
+                  ? 'bg-white/10 text-white hover:bg-red-500/25 hover:text-red-200'
+                  : 'bg-black/5 text-ink hover:bg-red-50 hover:text-red-600'
               )}
             >
               <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
