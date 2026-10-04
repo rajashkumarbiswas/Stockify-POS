@@ -46,3 +46,38 @@ export const DATE_RANGE_OPTIONS = [
   { value: 'this_month', label: 'This month' },
   { value: 'custom', label: 'Custom range' },
 ];
+
+// Payment methods (must match PAYMENT_METHODS in the backend)
+export const PAYMENT_METHOD_OPTIONS = [
+  { value: 'CASH', label: 'Cash' },
+  { value: 'CARD', label: 'Card' },
+  { value: 'MOBILE_BANKING', label: 'Mobile banking' },
+  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
+];
+
+export const PAYMENT_METHOD_LABELS = Object.fromEntries(
+  PAYMENT_METHOD_OPTIONS.map((option) => [option.value, option.label])
+);
+
+// Purchase statuses
+export const PURCHASE_STATUS_META = {
+  PENDING: { label: 'Pending', tone: 'warning' },
+  RECEIVED: { label: 'Received', tone: 'success' },
+  CANCELLED: { label: 'Cancelled', tone: 'neutral' },
+};
+
+export const PURCHASE_STATUS_OPTIONS = Object.entries(PURCHASE_STATUS_META).map(([value, meta]) => ({
+  value,
+  label: meta.label,
+}));
+
+export const PAYMENT_STATUS_META = {
+  PAID: { label: 'Paid', tone: 'success' },
+  PARTIAL: { label: 'Partial', tone: 'warning' },
+  UNPAID: { label: 'Unpaid', tone: 'danger' },
+};
+
+export const PAYMENT_STATUS_OPTIONS = Object.entries(PAYMENT_STATUS_META).map(([value, meta]) => ({
+  value,
+  label: meta.label,
+}));

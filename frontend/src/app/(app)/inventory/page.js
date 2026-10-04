@@ -15,29 +15,52 @@ import StockAdjustModal from '@/components/inventory/StockAdjustModal';
 import Badge from '@/components/ui/Badge';
 import EmptyState from '@/components/ui/EmptyState';
 import ErrorState from '@/components/ui/ErrorState';
-import PageHeader from '@/components/ui/PageHeader';
 import Pagination from '@/components/ui/Pagination';
 import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import SortableTh, { TH_CLASS } from '@/components/ui/SortableTh';
-import StatCard from '@/components/ui/StatCard';
 import TableSkeleton from '@/components/ui/TableSkeleton';
+
+// Makes the search box and the dropdowns inside green with a black text
+const GREEN_FIELDS =
+  '[&_input]:border-[#86efac] [&_input]:bg-[#dcfce7] [&_select]:border-[#86efac] [&_select]:bg-[#dcfce7]';
+
+function SummaryCard({ title, value, hint, icon: Icon }) {
+  return (
+    <div className="rounded-3xl bg-[#bbf7d0] p-5 text-ink">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-medium">{title}</h3>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+      </div>
+      <p className="mt-4 text-3xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 min-h-[1rem] text-xs text-ink/70">{hint}</p>
+    </div>
+  );
+}
 
 function SummaryCards({ summary }) {
   const { loading, error, data } = summary;
   const show = (value, formatter = formatNumber) => (loading ? '…' : error || !data ? '—' : formatter(value));
+  const ready = !loading && !error && data;
 
   return (
-    <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <StatCard title="Active products" value={show(data?.totalProducts)} icon={Package} hint={loading || error ? undefined : `${formatNumber(data?.totalUnits)} units in total`} />
-      <StatCard title="In stock" value={show(data?.inStock)} icon={PackageCheck} />
-      <StatCard title="Low stock" value={show(data?.lowStock)} icon={TriangleAlert} />
-      <StatCard title="Out of stock" value={show(data?.outOfStock)} icon={PackageX} />
-      <StatCard
+    <div className="mb-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <SummaryCard
+        title="Active products"
+        value={show(data?.totalProducts)}
+        icon={Package}
+        hint={ready ? `${formatNumber(data.totalUnits)} units in total` : ''}
+      />
+      <SummaryCard title="In stock" value={show(data?.inStock)} icon={PackageCheck} />
+      <SummaryCard title="Low stock" value={show(data?.lowStock)} icon={TriangleAlert} />
+      <SummaryCard title="Out of stock" value={show(data?.outOfStock)} icon={PackageX} />
+      <SummaryCard
         title="Stock value (cost)"
         value={show(data?.stockValueCost, formatMoney)}
         icon={Wallet}
-        hint={loading || error ? undefined : `Retail ${formatMoney(data?.stockValueRetail)}`}
+        hint={ready ? `Retail ${formatMoney(data.stockValueRetail)}` : ''}
       />
     </div>
   );
@@ -87,50 +110,58 @@ function InventoryContent() {
 
   return (
     <div>
-      <PageHeader title="Inventory" description="Track stock levels, add or remove stock and review every change." />
+      <header className="mb-5">
+        <h1 className="text-3xl font-semibold tracking-tight text-ink">Inventory</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Track stock levels, add or remove stock and review every change.
+        </p>
+      </header>
+
       <InventoryTabs />
       <SummaryCards summary={summary} />
 
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:flex-wrap">
-        <SearchInput
-          value={list.searchInput}
-          onChange={list.setSearchInput}
-          placeholder="Search name, SKU or barcode..."
-          className="lg:w-80"
-        />
-        <Select
-          aria-label="Filter by category"
-          placeholder="All categories"
-          options={categories}
-          value={params.category || ''}
-          onChange={(e) => list.setFilter('category', e.target.value)}
-          className="lg:w-48"
-        />
-        <Select
-          aria-label="Filter by stock level"
-          placeholder="Any stock level"
-          options={STOCK_STATUS_OPTIONS}
-          value={params.stockStatus || ''}
-          onChange={(e) => list.setFilter('stockStatus', e.target.value)}
-          className="lg:w-48"
-        />
-        <Select
-          aria-label="Filter by status"
-          placeholder="All statuses"
-          options={RECORD_STATUS_OPTIONS}
-          value={params.status || ''}
-          onChange={(e) => list.setFilter('status', e.target.value)}
-          className="lg:w-40"
-        />
-      </div>
+      <section className={`mb-4 rounded-3xl bg-white p-4 shadow-card ${GREEN_FIELDS}`}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
+          <SearchInput
+            value={list.searchInput}
+            onChange={list.setSearchInput}
+            placeholder="Search name, SKU or barcode..."
+            className="lg:w-80"
+          />
+          <Select
+            aria-label="Filter by category"
+            placeholder="All categories"
+            options={categories}
+            value={params.category || ''}
+            onChange={(e) => list.setFilter('category', e.target.value)}
+            className="lg:w-48"
+          />
+          <Select
+            aria-label="Filter by stock level"
+            placeholder="Any stock level"
+            options={STOCK_STATUS_OPTIONS}
+            value={params.stockStatus || ''}
+            onChange={(e) => list.setFilter('stockStatus', e.target.value)}
+            className="lg:w-48"
+          />
+          <Select
+            aria-label="Filter by status"
+            placeholder="All statuses"
+            options={RECORD_STATUS_OPTIONS}
+            value={params.status || ''}
+            onChange={(e) => list.setFilter('status', e.target.value)}
+            className="lg:w-40"
+          />
+        </div>
+      </section>
 
-      <div className="card overflow-hidden">
+      <div className="overflow-hidden rounded-3xl bg-white shadow-card">
         {error ? (
           <ErrorState message={error} onRetry={list.reload} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] text-sm">
-              <thead>
+              <thead className="bg-[#dcfce7]">
                 <tr>
                   <SortableTh label="Product" field="name" {...sortProps} />
                   <SortableTh label="Stock" field="currentStock" {...sortProps} />
@@ -157,11 +188,11 @@ function InventoryContent() {
               ) : (
                 <tbody className={loading ? 'opacity-60 transition-opacity' : ''}>
                   {items.map((product) => (
-                    <tr key={product.id} className="border-t border-black/5 hover:bg-white/60">
+                    <tr key={product.id} className="border-t border-black/5 transition-colors hover:bg-[#f0fdf4]">
                       <td className="px-4 py-3">
                         <Link
                           href={`/products/${product.id}`}
-                          className="block max-w-[240px] truncate font-semibold text-ink hover:underline"
+                          className="block max-w-[240px] truncate font-semibold text-ink hover:text-[#15803d]"
                         >
                           {product.name}
                         </Link>
@@ -171,14 +202,14 @@ function InventoryContent() {
                         {formatNumber(product.currentStock)}{' '}
                         <span className="text-xs font-normal text-slate-500">{product.unit}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-700">{formatNumber(product.minStockLevel)}</td>
+                      <td className="px-4 py-3 text-ink">{formatNumber(product.minStockLevel)}</td>
                       <td className="px-4 py-3">
                         <StockBadge status={product.stockStatus} />
                       </td>
                       {canSeeCost && (
-                        <td className="whitespace-nowrap px-4 py-3 text-slate-700">{formatMoney(product.purchasePrice)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-ink">{formatMoney(product.purchasePrice)}</td>
                       )}
-                      <td className="whitespace-nowrap px-4 py-3 text-slate-700">{formatMoney(product.sellingPrice)}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-ink">{formatMoney(product.sellingPrice)}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                         {formatDateTime(product.lastStockUpdateAt)}
                       </td>
@@ -189,18 +220,18 @@ function InventoryContent() {
                       </td>
                       {canAdjust && (
                         <td className="px-4 py-3">
-                          <div className="flex justify-end gap-1">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               type="button"
                               onClick={() => setAdjusting(product)}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink-800"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-[#1c1c20] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-black"
                             >
                               <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
                               Adjust
                             </button>
                             <Link
                               href={`/inventory/movements?product=${product.id}`}
-                              className="rounded-full p-2 text-slate-600 hover:bg-black/5 hover:text-ink"
+                              className="rounded-full p-2 text-slate-500 transition-colors hover:bg-[#dcfce7] hover:text-[#15803d]"
                               aria-label={`Stock history of ${product.name}`}
                               title="Stock history"
                             >

@@ -42,4 +42,24 @@ const notifyStockLevel = async ({ product, previousStock }, session) => {
   return notification;
 };
 
-module.exports = { notifyStockLevel };
+/** Tells managers a purchase was received (stock was added). Always called inside the purchase transaction. */
+const notifyPurchaseCompleted = async ({ purchase, supplierName, user }, session) => {
+  const [notification] = await Notification.create(
+    [
+      {
+        type: NOTIFICATION_TYPES.PURCHASE_COMPLETED,
+        severity: NOTIFICATION_SEVERITY.SUCCESS,
+        title: 'Purchase received',
+        message: `${user.name} received purchase ${purchase.invoiceNumber} from ${supplierName} (${purchase.items.length} item(s), total ${purchase.grandTotal}).`,
+        targetRoles: [ROLES.ADMIN, ROLES.MANAGER],
+        entityModel: 'Purchase',
+        entityId: purchase._id,
+      },
+    ],
+    { session }
+  );
+
+  return notification;
+};
+
+module.exports = { notifyStockLevel, notifyPurchaseCompleted };
