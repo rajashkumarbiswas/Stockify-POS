@@ -1,4 +1,6 @@
 const { Notification } = require('../models');
+const ApiError = require('../utils/ApiError');
+const { paginate } = require('../utils/paginate');
 const { getStockStatus, STOCK_SEVERITY } = require('../utils/stock');
 const {
   ROLES,
@@ -11,8 +13,6 @@ const {
  * Creates a low-stock / out-of-stock notification ONLY when a product moves to a worse
  * state (in stock -> low, low -> out...). Staying low does not create another one,
  * so managers are not flooded. Pass the transaction session when inside one.
- *
- * (Phase 13 adds list / mark-as-read functions to this file.)
  */
 const notifyStockLevel = async ({ product, previousStock }, session) => {
   const before = getStockStatus(previousStock, product.minStockLevel);
@@ -82,4 +82,61 @@ const notifySaleCompleted = async ({ sale, user }, session) => {
   return notification;
 };
 
-module.exports = { notifyStockLevel, notifyPurchaseCompleted, notifySaleCompleted };
+// ---------- Reading notifications (the bell in the top bar) ----------
+
+/** A notification is visible to a user when the user's role is in targetRoles. */
+const visibleTo = (user) => ({ targetRoles: user.role });
+
+/** Read state is stored per user in `readBy`; the client only receives a simple `read` flag. */
+const toDto = (doc, user) => {
+  const dto = typeof doc.toJSON === 'function' ? doc.toJSON() : { ...doc };
+  if (!dto.id && dto._id) dto.id = String(dto._id);
+  const userId = String(user._id);
+  dto.read = (dto.readBy || []).some((id) => String(id) === userId);
+  delete dto.readBy;
+  return dto;
+};
+
+const list = async (query, user) => {
+  const filter = { ...visibleTo(user) };
+  if (query.type) filter.type = query.type;
+  if (query.unread === true || query.unread === 'true') filter.readBy = { $ne: user._id };
+
+  const { items, pagination } = await paginate(Notification, filter, {
+    query,
+    allowedSort: ['createdAt'],
+    defaultSort: { createdAt: -1 },
+    populate: [],
+  });
+
+  return { items: items.map((doc) => toDto(doc, user)), pagination };
+};
+
+const unreadCount = async (user) =>
+  Notification.countDocuments({ ...visibleTo(user), readBy: { $ne: user._id } });
+
+const markRead = async (id, user) => {
+  const result = await Notification.updateOne(
+    { _id: id, ...visibleTo(user) },
+    { $addToSet: { readBy: user._id } }
+  );
+  if (result.matchedCount === 0) throw ApiError.notFound('Notification not found');
+};
+
+const markAllRead = async (user) => {
+  const result = await Notification.updateMany(
+    { ...visibleTo(user), readBy: { $ne: user._id } },
+    { $addToSet: { readBy: user._id } }
+  );
+  return result.modifiedCount;
+};
+
+module.exports = {
+  notifyStockLevel,
+  notifyPurchaseCompleted,
+  notifySaleCompleted,
+  list,
+  unreadCount,
+  markRead,
+  markAllRead,
+};

@@ -81,3 +81,16 @@ export const PAYMENT_STATUS_OPTIONS = Object.entries(PAYMENT_STATUS_META).map(([
   value,
   label: meta.label,
 }));
+
+
+// Sale statuses (must match SALE_STATUS in the backend)
+export const SALE_STATUS_META = {
+  COMPLETED: { label: 'Completed', tone: 'success' },
+  PARTIALLY_RETURNED: { label: 'Partially returned', tone: 'warning' },
+  RETURNED: { label: 'Returned', tone: 'neutral' },
+};
+
+export const SALE_STATUS_OPTIONS = Object.entries(SALE_STATUS_META).map(([value, meta]) => ({
+  value,
+  label: meta.label,
+}));

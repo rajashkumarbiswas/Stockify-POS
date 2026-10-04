@@ -23,14 +23,14 @@ import {
  */
 export const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, primary: true, ready: true },
-  { href: '/pos', label: 'POS', icon: ScanBarcode, permission: 'sales:create', primary: true, ready: false },
+  { href: '/pos', label: 'POS', icon: ScanBarcode, permission: 'sales:create', primary: true, ready: true },
   {
     href: '/sales',
     label: 'Sales',
     icon: Receipt,
     anyOf: ['sales:read_all', 'sales:read_own'],
     primary: true,
-    ready: false,
+    ready: true,
   },
   { href: '/products', label: 'Products', icon: Package, permission: 'products:read', primary: true, ready: true },
   { href: '/inventory', label: 'Inventory', icon: Boxes, permission: 'inventory:read', primary: true, ready: true },
@@ -42,7 +42,7 @@ export const NAV_ITEMS = [
     primary: true,
     ready: true,
   },
-  { href: '/customers', label: 'Customers', icon: Users, permission: 'customers:read', primary: true, ready: false },
+  { href: '/customers', label: 'Customers', icon: Users, permission: 'customers:read', primary: true, ready: true },
   { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports:view', primary: true, ready: false },
 
   { href: '/categories', label: 'Categories', icon: Tags, permission: 'categories:read', ready: true },

@@ -4,12 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { Bell, ChevronDown, LogOut, Menu, Search, UserCircle2, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Search, UserCircle2, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { ROLE_LABELS } from '@/lib/constants';
 import { NAV_ITEMS, isActivePath, isItemAllowed } from '@/lib/navigation';
 import useClickOutside from '@/hooks/useClickOutside';
 import Logo from '@/components/ui/Logo';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 const getInitials = (name) =>
   name
@@ -284,13 +285,7 @@ export default function AppShell({ children }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span
-              aria-disabled="true"
-              title="Notifications are coming soon"
-              className="flex h-11 w-11 cursor-not-allowed items-center justify-center rounded-full bg-black/5 text-slate-400"
-            >
-              <Bell className="h-[18px] w-[18px]" aria-hidden="true" />
-            </span>
+            {can('notifications:read') && <NotificationBell />}
             <UserMenu user={user} onLogout={handleLogout} signingOut={signingOut} />
           </div>
         </header>

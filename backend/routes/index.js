@@ -27,6 +27,8 @@ router.use('/sales', require('./sale.routes'));
 router.use('/inventory', require('./inventory.routes'));
 router.use('/suppliers', require('./supplier.routes'));
 router.use('/purchases', require('./purchase.routes'));
+router.use('/notifications', require('./notification.routes'));
+router.use('/activities', require('./activity.routes'));
 // Later phases mount: customers, sales, returns, reports...
 
 module.exports = router;
