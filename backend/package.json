@@ -14,7 +14,8 @@
     "core:test": "node seed/coreSmokeTest.js",
     "catalog:test": "node seed/catalogTest.js",
     "inventory:test": "node seed/inventoryTest.js",
-    "purchase:test": "node seed/purchaseTest.js"
+    "purchase:test": "node seed/purchaseTest.js",
+    "sales:test": "node seed/salesTest.js"
   },
   "engines": {
     "node": ">=18"

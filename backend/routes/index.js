@@ -22,6 +22,8 @@ router.use('/auth', require('./auth.routes'));
 router.use('/categories', require('./category.routes'));
 router.use('/brands', require('./brand.routes'));
 router.use('/products', require('./product.routes'));
+router.use('/customers', require('./customer.routes'));
+router.use('/sales', require('./sale.routes'));
 router.use('/inventory', require('./inventory.routes'));
 router.use('/suppliers', require('./supplier.routes'));
 router.use('/purchases', require('./purchase.routes'));

@@ -62,4 +62,24 @@ const notifyPurchaseCompleted = async ({ purchase, supplierName, user }, session
   return notification;
 };
 
-module.exports = { notifyStockLevel, notifyPurchaseCompleted };
+/** Tells managers a sale was completed. Always called inside the sale transaction. */
+const notifySaleCompleted = async ({ sale, user }, session) => {
+  const [notification] = await Notification.create(
+    [
+      {
+        type: NOTIFICATION_TYPES.SALE_COMPLETED,
+        severity: NOTIFICATION_SEVERITY.SUCCESS,
+        title: 'Sale completed',
+        message: `${user.name} completed sale ${sale.invoiceNumber} (${sale.items.length} item(s), total ${sale.grandTotal}).`,
+        targetRoles: [ROLES.ADMIN, ROLES.MANAGER],
+        entityModel: 'Sale',
+        entityId: sale._id,
+      },
+    ],
+    { session }
+  );
+
+  return notification;
+};
+
+module.exports = { notifyStockLevel, notifyPurchaseCompleted, notifySaleCompleted };
