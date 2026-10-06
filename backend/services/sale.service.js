@@ -258,4 +258,4 @@ const create = async (data, user) => {
   return getById(created._id, user);
 };
 
-module.exports = { list, getById, create };
+module.exports = { list, getById, create, recalculateCustomerTotals };

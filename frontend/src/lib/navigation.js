@@ -48,7 +48,7 @@ export const NAV_ITEMS = [
   { href: '/categories', label: 'Categories', icon: Tags, permission: 'categories:read', ready: true },
   { href: '/brands', label: 'Brands', icon: Bookmark, permission: 'brands:read', ready: true },
   { href: '/suppliers', label: 'Suppliers', icon: Truck, permission: 'suppliers:read', ready: true },
-  { href: '/returns', label: 'Returns', icon: Undo2, permission: 'returns:read', ready: false },
+  { href: '/returns', label: 'Returns', icon: Undo2, permission: 'returns:read', ready: true },
   { href: '/activity-logs', label: 'Activity logs', icon: ScrollText, permission: 'activities:view', ready: true },
   { href: '/settings', label: 'Settings', icon: Settings, permission: 'settings:update', ready: true },
 ];
