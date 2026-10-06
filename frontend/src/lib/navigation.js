@@ -49,8 +49,8 @@ export const NAV_ITEMS = [
   { href: '/brands', label: 'Brands', icon: Bookmark, permission: 'brands:read', ready: true },
   { href: '/suppliers', label: 'Suppliers', icon: Truck, permission: 'suppliers:read', ready: true },
   { href: '/returns', label: 'Returns', icon: Undo2, permission: 'returns:read', ready: false },
-  { href: '/activity-logs', label: 'Activity logs', icon: ScrollText, permission: 'activities:view', ready: false },
-  { href: '/settings', label: 'Settings', icon: Settings, permission: 'settings:update', ready: false },
+  { href: '/activity-logs', label: 'Activity logs', icon: ScrollText, permission: 'activities:view', ready: true },
+  { href: '/settings', label: 'Settings', icon: Settings, permission: 'settings:update', ready: true },
 ];
 
 export const isItemAllowed = (item, can, canAny) => {

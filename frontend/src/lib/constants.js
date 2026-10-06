@@ -94,3 +94,20 @@ export const SALE_STATUS_OPTIONS = Object.entries(SALE_STATUS_META).map(([value,
   value,
   label: meta.label,
 }));
+
+
+// Activity log entities (must match ENTITIES in backend/config/constants.js)
+export const ACTIVITY_ENTITY_OPTIONS = [
+  { value: 'AUTH', label: 'Sign in / out' },
+  { value: 'USER', label: 'User' },
+  { value: 'PRODUCT', label: 'Product' },
+  { value: 'CATEGORY', label: 'Category' },
+  { value: 'BRAND', label: 'Brand' },
+  { value: 'CUSTOMER', label: 'Customer' },
+  { value: 'SUPPLIER', label: 'Supplier' },
+  { value: 'PURCHASE', label: 'Purchase' },
+  { value: 'SALE', label: 'Sale' },
+  { value: 'RETURN', label: 'Return' },
+  { value: 'INVENTORY', label: 'Inventory' },
+  { value: 'SETTINGS', label: 'Settings' },
+];

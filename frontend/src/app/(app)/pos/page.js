@@ -19,6 +19,7 @@ import Modal from '@/components/ui/Modal';
 import Pagination from '@/components/ui/Pagination';
 import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
+import InvoiceModal from '@/components/sales/InvoiceModal';
 
 const DISCOUNT_TYPE_OPTIONS = [
   { value: 'FIXED', label: 'Fixed amount' },
@@ -614,7 +615,9 @@ function PosScreen() {
         </aside>
       </div>
 
-      {receipt && <ReceiptModal sale={receipt} onClose={() => setReceipt(null)} />}
+            {receipt && (
+        <InvoiceModal sale={receipt} title="Sale completed" closeLabel="New sale" onClose={() => setReceipt(null)} />
+      )}
     </div>
   );
 }

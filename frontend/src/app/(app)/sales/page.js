@@ -23,6 +23,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import Select from '@/components/ui/Select';
 import SortableTh, { TH_CLASS } from '@/components/ui/SortableTh';
 import TableSkeleton from '@/components/ui/TableSkeleton';
+import InvoiceModal from '@/components/sales/InvoiceModal';
 
 const ICON_BUTTON = 'rounded-full p-2 text-slate-500 transition-colors hover:bg-[#ece9f8] hover:text-[#6b5fb0]';
 
@@ -319,7 +320,7 @@ function SalesList() {
 
       <Pagination pagination={pagination} onPageChange={list.setPage} />
 
-      {viewing && <SaleDetailModal sale={viewing} canSeeCost={canSeeCost} onClose={() => setViewing(null)} />}
+            {viewing && <InvoiceModal sale={viewing} onClose={() => setViewing(null)} />}
     </div>
   );
 }
