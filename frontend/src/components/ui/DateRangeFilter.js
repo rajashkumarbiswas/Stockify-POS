@@ -9,9 +9,12 @@ import Select from '@/components/ui/Select';
  * Date filter (Today / Yesterday / This week / This month / Custom range).
  * Calls onChange({ range, from, to }) with the values to send to the API.
  * Place it inside a flex row of filters.
+ *
+ * allowAll={false} removes the "All time" choice (reports always need a period);
+ * initialChoice sets the range shown first (e.g. "this_month").
  */
-export default function DateRangeFilter({ onChange, className }) {
-  const [choice, setChoice] = useState('');
+export default function DateRangeFilter({ onChange, className, allowAll = true, initialChoice = '' }) {
+  const [choice, setChoice] = useState(initialChoice);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [error, setError] = useState('');
@@ -41,7 +44,7 @@ export default function DateRangeFilter({ onChange, className }) {
     <>
       <Select
         aria-label="Filter by date"
-        placeholder="All time"
+        placeholder={allowAll ? 'All time' : undefined}
         options={DATE_RANGE_OPTIONS}
         value={choice}
         onChange={(e) => handleChoice(e.target.value)}

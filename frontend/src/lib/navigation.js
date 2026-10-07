@@ -43,7 +43,7 @@ export const NAV_ITEMS = [
     ready: true,
   },
   { href: '/customers', label: 'Customers', icon: Users, permission: 'customers:read', primary: true, ready: true },
-  { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports:view', primary: true, ready: false },
+  { href: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports:view', primary: true, ready: true },
 
   { href: '/categories', label: 'Categories', icon: Tags, permission: 'categories:read', ready: true },
   { href: '/brands', label: 'Brands', icon: Bookmark, permission: 'brands:read', ready: true },

@@ -32,6 +32,7 @@ router.use('/activities', require('./activity.routes'));
 router.use('/settings', require('./settings.routes'));
 router.use('/returns', require('./return.routes'));
 router.use('/dashboard', require('./dashboard.routes'));
-// Later phases mount: customers, sales, returns, reports...
+router.use('/reports', require('./report.routes'));
+
 
 module.exports = router;
