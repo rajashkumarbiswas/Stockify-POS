@@ -268,16 +268,17 @@ function PurchasesReport({ data }) {
 function ReportsView() {
   const [tab, setTab] = useState('sales');
   const [filter, setFilter] = useState({ range: 'this_month', from: '', to: '' });
-  const [state, setState] = useState({ loading: true, error: '', data: null });
+  // `tab` inside the state tells which report the data belongs to
+  const [state, setState] = useState({ loading: true, error: '', data: null, tab: 'sales' });
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let active = true;
-    setState({ loading: true, error: '', data: null });
+    setState({ loading: true, error: '', data: null, tab });
     api
       .get(`/reports/${tab}`, filter)
-      .then((res) => active && setState({ loading: false, error: '', data: res.data }))
-      .catch((err) => active && setState({ loading: false, error: err.message, data: null }));
+      .then((res) => active && setState({ loading: false, error: '', data: res.data, tab }))
+      .catch((err) => active && setState({ loading: false, error: err.message, data: null, tab }));
     return () => {
       active = false;
     };
@@ -289,6 +290,11 @@ function ReportsView() {
   };
 
   const { loading, error, data } = state;
+
+  // Right after clicking another tab, the old tab's data is still in the state for one render.
+  // It must never be shown in the new tab, so only use data that belongs to the current tab.
+  const sameTab = state.tab === tab;
+  const ready = sameTab && !loading && Boolean(data);
 
   return (
     <div>
@@ -315,14 +321,14 @@ function ReportsView() {
           </div>
           <DateRangeFilter allowAll={false} initialChoice="this_month" onChange={handleRange} className="lg:w-48" />
         </div>
-        {data && <p className="mt-3 text-xs text-slate-500">Showing {periodLabel(data.period)}</p>}
+        {ready && <p className="mt-3 text-xs text-slate-500">Showing {periodLabel(data.period)}</p>}
       </section>
 
-      {error ? (
+      {sameTab && error ? (
         <div className="rounded-3xl bg-white shadow-card">
           <ErrorState message={error} onRetry={() => setReloadKey((key) => key + 1)} />
         </div>
-      ) : loading || !data ? (
+      ) : !ready ? (
         <LoadingBlocks />
       ) : tab === 'sales' ? (
         <SalesReport data={data} />
